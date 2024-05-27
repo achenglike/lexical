@@ -42,6 +42,9 @@ import {
   $setCompositionKey,
   $setNodeKey,
   $setSelection,
+  arrayInsertAfter,
+  arrayInsertBefore,
+  arrayReplace,
   errorOnInsertTextNodeOnRoot,
   internalMarkNodeAsDirty,
   removeFromParent,
@@ -308,6 +311,13 @@ export class LexicalNode {
     const parent = this.getParent();
     if (parent === null) {
       return -1;
+    }
+
+    if (parent.__childkey.length === parent.__size) { 
+      return parent.__childkey.indexOf(this.__key);
+    }
+    if (__DEV__) {
+      console.warn(`getIndexWithinParent bad state: ${parent.__childkey} size:${parent.__size}`);
     }
     let node = parent.getFirstChild();
     let index = 0;
@@ -709,6 +719,7 @@ export class LexicalNode {
       mutableNode.__first = latestNode.__first;
       mutableNode.__last = latestNode.__last;
       mutableNode.__size = latestNode.__size;
+      mutableNode.__childkey = latestNode.__childkey;
       mutableNode.__indent = latestNode.__indent;
       mutableNode.__format = latestNode.__format;
       mutableNode.__dir = latestNode.__dir;
@@ -891,6 +902,7 @@ export class LexicalNode {
     writableReplaceWith.__next = nextKey;
     writableReplaceWith.__parent = parentKey;
     writableParent.__size = size;
+    arrayReplace(writableParent.__childkey, toReplaceKey, key);
     if (includeChildren) {
       invariant(
         $isElementNode(this) && $isElementNode(writableReplaceWith),
@@ -962,6 +974,7 @@ export class LexicalNode {
       writableNextSibling.__prev = insertKey;
     }
     writableParent.__size++;
+    arrayInsertAfter(writableParent.__childkey, writableSelf.__key, insertKey);
     writableSelf.__next = insertKey;
     writableNodeToInsert.__next = nextKey;
     writableNodeToInsert.__prev = writableSelf.__key;
@@ -1013,6 +1026,7 @@ export class LexicalNode {
       writablePrevSibling.__next = insertKey;
     }
     writableParent.__size++;
+    arrayInsertBefore(writableParent.__childkey, writableSelf.__key, insertKey);
     writableSelf.__prev = insertKey;
     writableNodeToInsert.__prev = prevKey;
     writableNodeToInsert.__next = writableSelf.__key;

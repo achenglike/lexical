@@ -324,6 +324,7 @@ export class CollabElementNode {
         if (prevChildNode === null) {
           const nextSibling = writableLexicalNode.getFirstChild();
           writableLexicalNode.__first = childKey;
+          writableLexicalNode.__childkey.push(childKey);
           if (nextSibling !== null) {
             const writableNextSibling = nextSibling.getWritable();
             writableNextSibling.__prev = childKey;
@@ -334,6 +335,7 @@ export class CollabElementNode {
           const nextSibling = prevChildNode.getNextSibling();
           writablePrevChildNode.__next = childKey;
           lexicalChildNode.__prev = prevChildNode.__key;
+          arrayInsertAfter(writableLexicalNode.__childkey, writablePrevChildNode.__key, childKey);
           if (nextSibling !== null) {
             const writableNextSibling = nextSibling.getWritable();
             writableNextSibling.__prev = childKey;
@@ -653,6 +655,15 @@ export class CollabElementNode {
 
     collabNodeMap.delete(this._key);
   }
+}
+
+function arrayInsertAfter<T>(arr: T[], anchor: T, toInsert: T): T[] {
+  const index = arr.indexOf(anchor);
+  if (index === -1) {
+      return arr;
+  }
+  arr.splice(index + 1, 0, toInsert);
+  return arr;
 }
 
 export function $createCollabElementNode(

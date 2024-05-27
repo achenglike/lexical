@@ -33,6 +33,7 @@ import {errorOnReadOnly, getActiveEditor} from '../LexicalUpdates';
 import {
   $getNodeByKey,
   $isRootOrShadowRoot,
+  arraySplice,
   removeFromParent,
 } from '../LexicalUtils';
 
@@ -67,6 +68,8 @@ export class ElementNode extends LexicalNode {
   /** @internal */
   __size: number;
   /** @internal */
+  __childkey: Array<NodeKey>;
+  /** @internal */
   __format: number;
   /** @internal */
   __indent: number;
@@ -78,6 +81,7 @@ export class ElementNode extends LexicalNode {
     this.__first = null;
     this.__last = null;
     this.__size = 0;
+    this.__childkey = [];
     this.__format = 0;
     this.__indent = 0;
     this.__dir = null;
@@ -454,6 +458,7 @@ export class ElementNode extends LexicalNode {
     }
 
     writableSelf.__size = newSize;
+    arraySplice(writableSelf.__childkey, start, deleteCount, nodesToInsertKeys)
 
     // In case of deletion we need to adjust selection, unlink removed nodes
     // and clean up node itself if it becomes empty. None of these needed

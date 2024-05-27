@@ -345,6 +345,7 @@ export function removeFromParent(node: LexicalNode): void {
       writableNode.__next = null;
     }
     writableParent.__size--;
+    arrayRemove(writableParent.__childkey, writableNode.__key);
     writableNode.__parent = null;
   }
 }
@@ -1690,4 +1691,52 @@ export function $getAncestor<NodeType extends LexicalNode = LexicalNode>(
  */
 export function $getEditor(): LexicalEditor {
   return getActiveEditor();
+}
+
+export function arrayReplace<T>(arr: T[], oldValue: T, newValue: T): T[] {
+  const index = arr.indexOf(oldValue);
+  if (index !== -1) {
+      arr[index] = newValue;
+  }
+  return arr;
+}
+
+export function arrayInsertAfter<T>(arr: T[], anchor: T, toInsert: T): T[] {
+  const index = arr.indexOf(anchor);
+  if (index === -1) {
+      return arr;
+  }
+  arr.splice(index + 1, 0, toInsert);
+  return arr;
+}
+
+export function arrayInsertBefore<T>(arr: T[], anchor: T, toInsert: T): T[] {
+  const index = arr.indexOf(anchor);
+  if (index === -1) {
+      return arr;
+  }
+
+  arr.splice(index, 0, toInsert);
+  return arr;
+}
+
+export function arrayRemove<T>(arr: T[], toRemove: T): T[] {
+  const index = arr.indexOf(toRemove);
+  if (index === -1) {
+      return arr;
+  }
+  arr.splice(index, 1);
+  return arr;
+}
+
+
+export function arraySplice<T>(
+  arr: T[], 
+  start: number,
+  deleteCount: number,
+  nodesToInsert: Array<T>,
+): T[] { 
+  // 使用 splice 方法来删除元素并插入新元素
+  arr.splice(start, deleteCount, ...nodesToInsert);
+  return arr;
 }
