@@ -35,6 +35,7 @@ import {
   insertTableRowBelow,
   IS_COLLAB,
   IS_LINUX,
+  IS_WINDOWS,
   LEGACY_EVENTS,
   mergeTableCells,
   pasteFromClipboard,
@@ -308,11 +309,16 @@ test.describe.parallel('Tables', () => {
     isPlainText,
     isCollab,
     browserName,
+    legacyEvents,
   }) => {
     await initialize({isCollab, page});
     test.skip(isPlainText);
     // Table edge cursor doesn't show up in Firefox.
     test.fixme(browserName === 'firefox');
+    test.fixme(
+      legacyEvents && browserName === 'chromium' && IS_WINDOWS,
+      'Flaky on Windows + Chromium + legacy events',
+    );
 
     await focusEditor(page);
     await insertTable(page, 2, 2);
@@ -2568,6 +2574,100 @@ test.describe.parallel('Tables', () => {
             <td class="PlaygroundEditorTheme__tableCell" colspan="2">
               <p class="PlaygroundEditorTheme__paragraph"><br /></p>
             </td>
+          </tr>
+        </table>
+        <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+      `,
+    );
+  });
+
+  test('Delete columns backward', async ({page, isPlainText, isCollab}) => {
+    await initialize({isCollab, page});
+    test.skip(isPlainText);
+    if (IS_COLLAB) {
+      // The contextual menu positioning needs fixing (it's hardcoded to show on the right side)
+      page.setViewportSize({height: 1000, width: 3000});
+    }
+
+    await focusEditor(page);
+
+    await insertTable(page, 2, 4);
+
+    await selectCellsFromTableCords(
+      page,
+      {x: 3, y: 1},
+      {x: 1, y: 1},
+      false,
+      false,
+    );
+
+    await deleteTableColumns(page);
+
+    await assertHTML(
+      page,
+      html`
+        <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+        <table class="PlaygroundEditorTheme__table">
+          <tr>
+            <th
+              class="PlaygroundEditorTheme__tableCell PlaygroundEditorTheme__tableCellHeader">
+              <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+            </th>
+          </tr>
+          <tr>
+            <th
+              class="PlaygroundEditorTheme__tableCell PlaygroundEditorTheme__tableCellHeader">
+              <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+            </th>
+          </tr>
+        </table>
+        <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+      `,
+    );
+  });
+
+  test('Delete columns forward at end of table', async ({
+    page,
+    isPlainText,
+    isCollab,
+  }) => {
+    await initialize({isCollab, page});
+    test.skip(isPlainText);
+    if (IS_COLLAB) {
+      // The contextual menu positioning needs fixing (it's hardcoded to show on the right side)
+      page.setViewportSize({height: 1000, width: 3000});
+    }
+
+    await focusEditor(page);
+
+    await insertTable(page, 2, 4);
+
+    await selectCellsFromTableCords(
+      page,
+      {x: 1, y: 1},
+      {x: 3, y: 1},
+      false,
+      false,
+    );
+
+    await deleteTableColumns(page);
+
+    await assertHTML(
+      page,
+      html`
+        <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+        <table class="PlaygroundEditorTheme__table">
+          <tr>
+            <th
+              class="PlaygroundEditorTheme__tableCell PlaygroundEditorTheme__tableCellHeader">
+              <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+            </th>
+          </tr>
+          <tr>
+            <th
+              class="PlaygroundEditorTheme__tableCell PlaygroundEditorTheme__tableCellHeader">
+              <p class="PlaygroundEditorTheme__paragraph"><br /></p>
+            </th>
           </tr>
         </table>
         <p class="PlaygroundEditorTheme__paragraph"><br /></p>
